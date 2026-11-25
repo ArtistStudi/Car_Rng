@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1020">
+  <title>CAR RNG — Garage</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #0a1020; }
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    #game { display: block; width: 100%; height: 100%; border: 0; background: #0a1020; }
+  </style>
+</head>
+<body>
+  <iframe id="game" src="./index.html" title="CAR RNG — jeu de collection de voitures" allow="clipboard-read; clipboard-write"></iframe>
+  <script>
+    const game = document.querySelector('#game');
+    const theme = `
+      :root {
+        --ink: #edf3ff !important;
+        --muted: #9aa9c3 !important;
+        --navy: #101a2d !important;
+        --blue: #6388ff !important;
+        --gold: #ffd166 !important;
+        --green: #39d6a0 !important;
+        --shadow: 0 16px 40px #02061780 !important;
+        color-scheme: dark;
+      }
+      html { scroll-behavior: smooth; }
+      body {
+        min-height: 100vh !important;
+        color: #edf3ff !important;
+        background: radial-gradient(ellipse at 12% -8%, #1c3761 0, transparent 38%), radial-gradient(ellipse at 95% 15%, #342653 0, transparent 30%), #0a1020 !important;
+      }
+      header {
+        min-height: 76px !important;
+        padding: 12px max(20px, calc((100vw - 1260px) / 2)) !important;
+        background: #0b1325eF !important;
+        border-bottom: 1px solid #ffffff14 !important;
+        box-shadow: 0 10px 32px #02061755 !important;
+        backdrop-filter: blur(18px);
+      }
+      .brand { font-size: 24px !important; letter-spacing: -.06em; }
+      .brand span { color: #ffd166 !important; }
+      .icon, .wallet, .action {
+        border: 1px solid #ffffff1c !important;
+        border-radius: 13px !important;
+        background: #ffffff0b !important;
+        color: #edf3ff !important;
+      }
+      .wallet { background: #17233b !important; }
+      .main { max-width: 1260px !important; padding: 26px 22px 64px !important; }
+      .stats { gap: 12px !important; margin-bottom: 20px !important; }
+      .stat {
+        border: 1px solid #ffffff12 !important;
+        border-radius: 18px !important;
+        background: linear-gradient(145deg, #17243b, #111b2e) !important;
+        box-shadow: 0 10px 25px #02061738 !important;
+        transform: none !important;
+      }
+      .stat:nth-child(n) { background: linear-gradient(145deg, #17243b, #111b2e) !important; }
+      .stat small { color: #9aa9c3 !important; }
+      .stat strong { color: #f5f8ff !important; }
+      .hero { gap: 16px !important; }
+      .panel {
+        padding: 21px !important;
+        border: 1px solid #ffffff13 !important;
+        border-radius: 22px !important;
+        background: linear-gradient(145deg, #151f33, #10192a) !important;
+        box-shadow: 0 16px 38px #02061745 !important;
+      }
+      .panel h2, .panel h3 { color: #f5f8ff !important; }
+      .stage {
+        min-height: 310px;
+        border: 1px solid #ffffff22 !important;
+        border-radius: 20px !important;
+        background: radial-gradient(ellipse at 50% 20%, #5b7fbd 0, #263b5e 46%, #17273c 100%) !important;
+        box-shadow: inset 0 -7px #0e1b30, 0 12px 30px #02061755 !important;
+      }
+      .stage:before { opacity: .14; }
+      .stage:after { opacity: .75; }
+      .stage h2 { color: #fff !important; text-shadow: 0 2px 18px #071326 !important; }
+      .stage p { color: #d3def3 !important; }
+      .roll {
+        min-height: 54px;
+        border: 1px solid #ffe29a !important;
+        border-radius: 15px !important;
+        background: linear-gradient(135deg, #ffe08a, #ffb938) !important;
+        color: #241a08 !important;
+        box-shadow: 0 5px 0 #ad6d1d, 0 13px 25px #ffbd3c22 !important;
+        font-weight: 950 !important;
+      }
+      .info { border: 1px solid #ffffff12 !important; border-radius: 15px !important; background: #ffffff08 !important; color: #edf3ff !important; }
+      .info:nth-of-type(2), .info:nth-of-type(3) { background: #ffffff08 !important; }
+      .info small { color: #9aa9c3 !important; }
+      .questbar { background: #ffffff17 !important; }
+      .questbar i { background: linear-gradient(90deg, #5b8cff, #41dfb0) !important; }
+      .tabs { gap: 9px !important; margin: 20px 0 14px !important; }
+      .tab {
+        border: 1px solid #ffffff13 !important;
+        border-radius: 13px !important;
+        background: #121d30 !important;
+        color: #bdc9dc !important;
+        box-shadow: none !important;
+      }
+      .tab:nth-child(n) { background: #121d30 !important; }
+      .tab.active { border-color: #7090ff !important; background: #344f9c !important; color: #fff !important; box-shadow: 0 5px 18px #456df633 !important; }
+      .section-head h2 { color: #f3f6ff !important; }
+      .section-head p { color: #99a9c2 !important; }
+      .grid { gap: 14px !important; }
+      .card {
+        border: 1px solid #ffffff14 !important;
+        border-radius: 18px !important;
+        background: linear-gradient(155deg, #1a2941, #111b2e) !important;
+        color: #edf3ff !important;
+        box-shadow: 0 8px 20px #02061740 !important;
+      }
+      .card:nth-child(n) { background: linear-gradient(155deg, #1a2941, #111b2e) !important; }
+      .card:hover { transform: translateY(-4px) !important; border-color: #7794e766 !important; box-shadow: 0 14px 28px #02061770 !important; }
+      .card h3 { color: #f4f7ff !important; }
+      .card p, .card.locked { color: #a5b2c8 !important; }
+      .mini-art { border-radius: 12px; background: #ffffff08; }
+      .count { background: #263b5b !important; }
+      .sell, .claim { border: 0 !important; border-radius: 11px !important; background: #1b9b78 !important; color: #fff !important; box-shadow: 0 4px 0 #11664f !important; }
+      .claim:disabled { background: #29364b !important; color: #8391a9 !important; box-shadow: none !important; }
+      .empty { border-color: #ffffff25 !important; background: #ffffff06 !important; color: #a5b2c8 !important; }
+      .overlay { background: #030712c9 !important; backdrop-filter: blur(10px) !important; }
+      .modal {
+        border: 1px solid #ffffff1b !important;
+        border-radius: 24px !important;
+        background: radial-gradient(ellipse at top, #1b2b48, #111a2b 68%) !important;
+        color: #edf3ff !important;
+        box-shadow: 0 28px 90px #0009 !important;
+      }
+      .modal h1, .modal h2, .modal h3 { color: #f7f9ff !important; }
+      .modal p, .modal small { color: #aab8cf !important; }
+      .login h1 span { color: #ffd166 !important; }
+      .login input, .admin input, .admin select {
+        border: 1px solid #ffffff20 !important;
+        border-radius: 12px !important;
+        background: #0c1424 !important;
+        color: #f3f6ff !important;
+      }
+      .modal .action { background: #202e46 !important; }
+      .welcome { background: radial-gradient(ellipse at 50% 0, #1c3761, #0d1423 72%) !important; }
+      .welcome .goal { border-color: #ffffff1b !important; background: #ffffff08 !important; }
+      .welcome .action { background: linear-gradient(135deg, #ffe08a, #ffbb43) !important; color: #241a08 !important; }
+      .online-list { background: #0c1424 !important; color: #dce6f6 !important; }
+      .online-player { background: #ffffff08 !important; }
+      .admin-note, .command-help { border-radius: 12px !important; background: #252b3a !important; color: #d3def3 !important; }
+      .toast { border: 1px solid #ffffff20; background: #1a2941 !important; color: #fff !important; }
+      @media (max-width: 700px) {
+        header { min-height: 64px !important; padding: 8px 12px !important; }
+        .main { padding: 17px 12px 42px !important; }
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .hero { grid-template-columns: 1fr !important; }
+        .panel { padding: 15px !important; }
+        .stage { min-height: 260px !important; }
+        .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 9px !important; }
+        .tabs { gap: 7px !important; }
+        .tab { padding: 10px 12px !important; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      }
+    `;
+    game.addEventListener('load', () => {
+      const style = game.contentDocument.createElement('style');
+      style.id = 'carrng-refresh-theme';
+      style.textContent = theme;
+      game.contentDocument.head.append(style);
+    });
+  </script>
+</body>
+</html>
